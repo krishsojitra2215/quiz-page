@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-container, .quiz-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .option {
+            background-color: #008CBA;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #result {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        #next-button {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            margin-top: 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #next-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .login-container {
+            width: 300px;
+        }
+
+        form {
+            text-align: left;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button[type="submit"] {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Login</h1>
+        <form id="login-form">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required><br><br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required><br><br>
+            <button type="submit">Log In</button>
+        </form>
+    </div>
+
+    <div class="quiz-container" style="display: none;">
+        <h1>Quiz Title</h1>
+        <div id="question-container">
+            <p id="question"></p>
+        </div>
+        <div id="options-container">
+            <button class="option" onclick="checkAnswer(0)"></button>
+            <button class="option" onclick="checkAnswer(1)"></button>
+            <button class="option" onclick="checkAnswer(2)"></button>
+            <button class="option" onclick="checkAnswer(3)"></button>
+        </div>
+        <p id="result"></p>
+        <button id="next-button" onclick="nextQuestion()">Next</button>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What is the capital of India?",
+                options: ["Gujarat", "Maharashtra", "Delhi", "Hyderabad"],
+                correctAnswer: 2,
+            },
+            {
+                question: "Which is the largest Indian State in terms of Population",
+                options: ["Madhya Pradesh", "Uttar Pradesh", "Odisha", "Gujarat"],
+                correctAnswer: 1,
+            },
+            {
+                question: "Which is the Richest State in India",
+                options: ["Maharashtra", "Tamil Nadu", "Karnataka", "Gujarat"],
+                correctAnswer: 0,  
+            }
+            
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const loginContainer = document.querySelector(".login-container");
+        const quizContainer = document.querySelector(".quiz-container");
+        const questionElement = document.getElementById("question");
+        const optionsContainer = document.getElementById("options-container");
+        const resultElement = document.getElementById("result");
+        const nextButton = document.getElementById("next-button");
+
+        const loginForm = document.getElementById("login-form");
+
+        loginForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            // You can replace this with your actual login logic.
+            // For this example, I'll just check if the username is "anyuser" and password is "makeyourown".
+            if (username === "anyuser" && password === "makeyourown") {
+                loginContainer.style.display = "none";
+                quizContainer.style.display = "block";
+                loadQuestion();
+            } else {
+                alert("Wrong Credentials. Don't try to act smart🙃");
+            }
+        });
+
+        function loadQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            questionElement.innerText = currentQuestion.question;
+
+            optionsContainer.innerHTML = "";
+            for (let i = 0; i < currentQuestion.options.length; i++) {
+                const optionButton = document.createElement("button");
+                optionButton.classList.add("option");
+                optionButton.innerText = currentQuestion.options[i];
+                optionButton.addEventListener("click", () => checkAnswer(i));
+                optionsContainer.appendChild(optionButton);
+            }
+        }
+
+        function checkAnswer(selectedIndex) {
+            const currentQuestion = questions[currentQuestionIndex];
+            if (selectedIndex === currentQuestion.correctAnswer) {
+                score++;
+                resultElement.innerText = "Correct!🎉";
+            } else {
+                resultElement.innerText = "Incorrect!😥";
+            }
+
+            optionsContainer.querySelectorAll(".option").forEach((button) => {
+                button.disabled = true;
+            });
+
+            nextButton.disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+                resultElement.innerText = "";
+                nextButton.disabled = true;
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            questionElement.innerText = `You scored ${score} out of ${questions.length}!`;
+            optionsContainer.innerHTML = "";
+            resultElement.innerText = "";
+            nextButton.style.display = "none";
+        }
+    </script>
+</body>
+</html>
